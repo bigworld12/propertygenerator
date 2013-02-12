@@ -155,9 +155,9 @@ void Widget::generateAccessors()
 
         if (ui->cEmitType->currentIndex() > 0) code.append("m_" + name);
 
-        code.append(");\n\t}");
+        code.append(");\n\t}\n");
 
-        if (chain) code.append("\n\treturn *this;\n");
+        if (chain) code.append("\treturn *this;\n");
 
         code.append("}\n");
     }
