@@ -140,17 +140,24 @@ void Widget::generateDeclaration()
 void Widget::generateAccessors()
 {
     code.append("private: ").append(type).append(" m_").append(name).append(";\n\n");
-    code.append("Q_SLOT inline ");
-    code.append(type).append(" ").append(name).append("() {\n\treturn ").append("m_").append(name).append(";\n}\n");
+    code.append("public: inline ");
+    code.append(type).append(" ").append(name).append("() const {\n\treturn ").append("m_").append(name).append(";\n}\n");
 
     if (write) {
-        code.append("Q_SLOT inline ");
+        code.append("Q_SLOT ");
         if (!chain) code.append("void ");
         else code.append(className).append(" &");
 
-        code.append("set" + capName).append("(const " + type + " &v) {\n\tm_" + name).append(" = v;\n");
+        code.append("set" + capName).append("(const " + type + " &v) {\n");
+        code.append("\tif (m_" + name + " != v) {\n");
+        code.append("\t\tm_" + name).append(" = v;\n");
+        code.append("\t\temit " + name + "Changed(");
 
-        if (chain) code.append("\treturn *this;\n");
+        if (ui->cEmitType->currentIndex() > 0) code.append("m_" + name);
+
+        code.append(");\n\t}");
+
+        if (chain) code.append("\n\treturn *this;\n");
 
         code.append("}\n");
     }
