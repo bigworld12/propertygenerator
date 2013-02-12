@@ -20,19 +20,7 @@ Widget::Widget(QWidget *parent) :
     allowedCharacters(256)
 {
     ui->setupUi(this);
-
-    ui->cDesignable->setChecked(designable);
-    ui->cScriptable->setChecked(scriptable);
-    ui->cStored->setChecked(stored);
-
-    ui->lblClassName->setVisible(false);
-    ui->lClassName->setVisible(false);
-
-    ui->cEmitType->addItem("void");
-    ui->cEmitType->addItem("by value");
-    ui->cEmitType->addItem("by reference");
-    ui->cEmitType->setVisible(false);
-
+    initGui();
     initAllowedCharacters();
     doConnections();
 }
@@ -64,6 +52,21 @@ void Widget::doConnections()
     connect(ui->lClassName, SIGNAL(editingFinished()), this, SLOT(validateClassName()));
 
     connect(ui->pGenerate, SIGNAL(clicked()), this, SLOT(generateSource()));
+}
+
+void Widget::initGui()
+{
+    ui->cDesignable->setChecked(designable);
+    ui->cScriptable->setChecked(scriptable);
+    ui->cStored->setChecked(stored);
+
+    ui->lblClassName->setVisible(false);
+    ui->lClassName->setVisible(false);
+
+    ui->cEmitType->addItem("void");
+    ui->cEmitType->addItem("by value");
+    ui->cEmitType->addItem("by reference");
+    ui->cEmitType->setVisible(false);
 }
 
 void Widget::initAllowedCharacters()
@@ -163,7 +166,6 @@ void Widget::generateAccessors()
         code.append(");");
     }
 }
-
 
 void Widget::writeClicked()
 {

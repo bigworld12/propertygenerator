@@ -42,6 +42,7 @@ private:
     Ui::Widget *ui;
 
     void doConnections();
+    void initGui();
     void initAllowedCharacters();
     QString doValidation(const QString &source);
     void generateDeclaration();
