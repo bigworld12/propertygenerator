@@ -1,5 +1,8 @@
+#include<QPainter>
+
 #include "widget.h"
 #include "ui_widget.h"
+#include "qtpropertygenerator.h"
 
 Widget::Widget(QWidget *parent) :
     QWidget(parent),
@@ -16,18 +19,22 @@ Widget::Widget(QWidget *parent) :
     constant(false),
     final(false),
     comment(false),
-    revision(0),
-    allowedCharacters(256)
+    revision(0)
 {
     ui->setupUi(this);
+    prnt = qobject_cast<QtPropertyGenerator*>(parent);
     initGui();
-    initAllowedCharacters();
     doConnections();
 }
 
 Widget::~Widget()
 {
     delete ui;
+}
+
+void Widget::deleteProperty()
+{
+    emit deleteMe(this);
 }
 
 void Widget::doConnections()
@@ -49,9 +56,8 @@ void Widget::doConnections()
 
     connect(ui->lName, SIGNAL(editingFinished()), this, SLOT(validateName()));
     connect(ui->lType, SIGNAL(editingFinished()), this, SLOT(validateType()));
-    connect(ui->lClassName, SIGNAL(editingFinished()), this, SLOT(validateClassName()));
 
-    connect(ui->pGenerate, SIGNAL(clicked()), this, SLOT(generateSource()));
+    connect(ui->pDelete, SIGNAL(clicked()), this, SLOT(deleteProperty()));
 }
 
 void Widget::initGui()
@@ -60,68 +66,15 @@ void Widget::initGui()
     ui->cScriptable->setChecked(scriptable);
     ui->cStored->setChecked(stored);
 
-    ui->lblClassName->setVisible(false);
-    ui->lClassName->setVisible(false);
-
     ui->cEmitType->addItem("void");
     ui->cEmitType->addItem("by value");
     ui->cEmitType->addItem("by reference");
     ui->cEmitType->setVisible(false);
 }
 
-void Widget::initAllowedCharacters()
-{
-    for (int i = 0; i < 256; ++i) allowedCharacters[i] = false;
 
-    QString allowed("AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz_0123456789");
-
-    for (int i = 0; i < allowed.length(); ++i) allowedCharacters[allowed.at(i).unicode()] = true;
-}
-
-QString Widget::doValidation(const QString &source)
-{
-    if (!source.isEmpty()) {
-        bool lastSpace = 0;
-        bool isValid = 0;
-        QString tempName;
-
-        for (int i = 0; i < source.length(); ++i) {
-            if (!isValid) {
-                if (source.at(i).unicode() > 60) {
-                    if (allowedCharacters[source.at(i).unicode()]) {
-                        isValid = true;
-                        tempName.append(source.at(i));
-                    }
-                }
-            }
-            else {
-                if (source.at(i) != ' ') {
-                    if (!lastSpace) {
-                        if (allowedCharacters[source.at(i).unicode()]) {
-                            tempName.append(source.at(i));
-                        }
-                    }
-                    else {
-                        if (allowedCharacters[source.at(i).unicode()]) {
-                            tempName.append(source.at(i).toUpper());
-                            lastSpace = false;
-                        }
-                    }
-                }
-                else lastSpace = true;
-            }
-        }
-        if (!tempName.isEmpty()) return tempName;
-        else return "INVALID";
-    }
-    else return "INVALID";
-}
-
-void Widget::generateDeclaration()
-{
-    code.append("// Auto generated property " + name + " : " + type + "\n");
-    if (comment) code.append("// " + ui->pComment->toPlainText() + "\n");
-
+void Widget::generateDeclaration(QString &code)
+{     
     code.append("Q_PROPERTY(" + type + " " + name + " READ " + name);
 
     if (write) code.append( " WRITE set" + capName);
@@ -137,40 +90,129 @@ void Widget::generateDeclaration()
     code.append(")\n");
 }
 
-void Widget::generateAccessors()
+void Widget::generateComment(QString &code)
 {
-    code.append("private: ").append(type).append(" m_").append(name).append(";\n\n");
-    code.append("public: inline ");
-    code.append(type).append(" ").append(name).append("() const {\n\treturn ").append("m_").append(name).append(";\n}\n");
+    if (comment) code.append("// " + ui->pComment->toPlainText() + "\n");
+}
 
+void Widget::generatePrivate(QString &code)
+{
+    code.append(type +" m_" + name + ";\n");
+}
+
+void Widget::generateNameType(QString &code)
+{
+    code.append(name + " : " + type + "\n");
+}
+
+void Widget::generateGetterDeclaration(QString &code)
+{
+    code.append(type + " " + name + "() const;\n");
+}
+
+void Widget::generateGetterDefinition(QString &code)
+{
+    code.append(type + " " + prnt->getClassName() + "::" + name + "() const {\n");
+    code.append("\treturn m_" + name + ";\n");
+    code.append("}\n");
+}
+
+void Widget::generateGetterInline(QString &code)
+{
+    code.append("inline " + type + " " + name + "() const {\n");
+    code.append("\treturn m_" + name + ";\n");
+    code.append("}\n");
+}
+
+void Widget::generateSetterDeclaration(QString &code)
+{
     if (write) {
         code.append("Q_SLOT ");
-        if (!chain) code.append("void ");
-        else code.append(className).append(" &");
+        if (chain) {
+            code.append(prnt->getClassName() + " &");
+        } else {
+            code.append("void");
+        }
 
-        code.append("set" + capName).append("(const " + type + " &v) {\n");
+        code.append("set" + capName + "(const " + type + " &v);\n");
+    }
+}
+
+void Widget::generateSetterDefinition(QString &code)
+{
+    if (write) {
+        code.append(type + " " + prnt->getClassName() + "::set" + capName + "(const " + type + " &v) {\n");
+
         code.append("\tif (m_" + name + " != v) {\n");
-        code.append("\t\tm_" + name).append(" = v;\n");
-        code.append("\t\temit " + name + "Changed(");
-
-        if (ui->cEmitType->currentIndex() > 0) code.append("m_" + name);
-
-        code.append(");\n\t}\n");
+        code.append("\t\tm_" + name + " = v;\n");
+        if (notify) {
+            if (ui->cEmitType->currentIndex() > 0) code.append("\t\temit " + name + "Changed(" + "m_" + name + ");\n");
+            else code.append("\t\temit " + name + "Changed();\n");
+        }
+        code.append("\t}\n");
 
         if (chain) code.append("\treturn *this;\n");
-
         code.append("}\n");
     }
+}
 
-    if (reset) {
-        code.append("Q_SLOT inline void reset" + capName).append("() {\n\t// TODO reset\n}\n");
+void Widget::generateSetterInline(QString &code)
+{
+    if (write) {
+        code.append("Q_SLOT ");
+        if (chain) {
+            code.append(prnt->getClassName() + " &");
+        } else {
+            code.append("void");
+        }
+
+        code.append("set" + capName + "(const " + type + " &v) {\n");
+        code.append("\tif (m_" + name + " != v) {\n");
+        code.append("\t\tm_" + name + " = v;\n");
+        if (notify) {
+            if (ui->cEmitType->currentIndex() > 0) code.append("\t\temit " + name + "Changed(" + "m_" + name + ");\n");
+            else code.append("\t\temit " + name + "Changed();\n");
+        }
+        code.append("\t}\n");
+
+        if (chain) code.append("\treturn *this;\n");
+        code.append("}\n");
     }
+}
 
+void Widget::generateResetDeclaration(QString &code)
+{
+    if (reset) {
+        code.append("Q_SLOT void reset" + capName + "();\n");
+    }
+}
+
+void Widget::generateResetDefinition(QString &code)
+{
+    if (reset) {
+        code.append(type + " " + prnt->getClassName() + "::reset" + capName + "() {\n");
+        code.append("\t//TODO reset\n}\n");
+    }
+}
+
+void Widget::generateResetInline(QString &code)
+{
+    if (reset) {
+        code.append("Q_SLOT void reset" + capName + "() {\n");
+        code.append("\t//TODO reset\n}\n");
+    }
+}
+
+void Widget::generateNotify(QString &code)
+{
     if (notify) {
-        code.append("Q_SIGNAL void " + name + "Changed" + "(");
-        if (ui->cEmitType->currentIndex() == 1) code.append(type);
-        else if (ui->cEmitType->currentIndex() == 2) code.append(type + "&");
-        code.append(");");
+        code.append("Q_SIGNAL void " + name + "Changed(");
+        if (ui->cEmitType->currentIndex() == 1) {
+            code.append(type);
+        } else if (ui->cEmitType->currentIndex() == 2) {
+            code.append(type + " &");
+        }
+        code.append(");\n");
     }
 }
 
@@ -183,8 +225,6 @@ void Widget::writeClicked()
 void Widget::chainClicked()
 {
     chain = ui->cChain->isChecked();
-    ui->lblClassName->setVisible(chain);
-    ui->lClassName->setVisible(chain);
 }
 
 void Widget::resetClicked()
@@ -247,29 +287,25 @@ void Widget::setRev(int r)
 
 void Widget::validateName()
 {
-    name = doValidation(ui->lName->text());
+    name = prnt->doValidation(ui->lName->text());
     ui->lName->setText(name);
+    capName = name;
+    capName[0] = capName[0].toUpper();
 }
 
 void Widget::validateType()
 {
-    type = doValidation(ui->lType->text());
+    type = prnt->doValidation(ui->lType->text());
     ui->lType->setText(type);
 }
 
-void Widget::validateClassName()
+void Widget::paintEvent(QPaintEvent *)
 {
-    className = doValidation(ui->lClassName->text());
-    ui->lClassName->setText(className);
-}
+    QPainter p(this);
+    QLinearGradient g(rect().topRight(), rect().bottomRight());
+    g.setColorAt(0.0f, Qt::white);
+    g.setColorAt(1.0f, Qt::lightGray);
+    p.fillRect(rect(), g);
 
-void Widget::generateSource()
-{
-    code.clear();
-    capName = name;
-    capName[0] = capName[0].toUpper();
-    generateDeclaration();
-    generateAccessors();
-    ui->plainTextEdit->setPlainText(code);
 }
 

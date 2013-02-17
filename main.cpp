@@ -1,10 +1,12 @@
-#include "widget.h"
 #include <QApplication>
+
+#include "qtpropertygenerator.h"
+
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    Widget w;
+    QtPropertyGenerator w;
     w.show();
     
     return a.exec();

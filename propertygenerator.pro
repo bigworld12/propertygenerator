@@ -13,8 +13,11 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        widget.cpp
+        widget.cpp \
+    qtpropertygenerator.cpp
 
-HEADERS  += widget.h
+HEADERS  += widget.h \
+    qtpropertygenerator.h
 
-FORMS    += widget.ui
+FORMS    += widget.ui \
+    qtpropertygenerator.ui

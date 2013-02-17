@@ -2,11 +2,12 @@
 #define WIDGET_H
 
 #include <QWidget>
-#include <QBitArray>
 
 namespace Ui {
 class Widget;
 }
+
+class QtPropertyGenerator;
 
 class Widget : public QWidget
 {
@@ -15,6 +16,28 @@ class Widget : public QWidget
 public:
     explicit Widget(QWidget *parent = 0);
     ~Widget();
+
+public slots:
+    void deleteProperty();
+    void generateDeclaration(QString &code);
+    void generateComment(QString &code);
+    void generatePrivate(QString &code);
+    void generateNameType(QString &code);
+
+    void generateGetterDeclaration(QString &code);
+    void generateGetterDefinition(QString &code);
+    void generateGetterInline(QString &code);
+
+    void generateSetterDeclaration(QString &code);
+    void generateSetterDefinition(QString &code);
+    void generateSetterInline(QString &code);
+
+    void generateResetDeclaration(QString &code);
+    void generateResetDefinition(QString &code);
+    void generateResetInline(QString &code);
+
+    void generateNotify(QString &code);
+
 
 private slots:
     void writeClicked();
@@ -34,22 +57,20 @@ private slots:
 
     void validateName();
     void validateType();
-    void validateClassName();
 
-    void generateSource();
+protected:
+    void paintEvent(QPaintEvent *);
+
+signals:
+    void deleteMe(Widget *);
     
 private:
     Ui::Widget *ui;
 
-    void doConnections();
     void initGui();
-    void initAllowedCharacters();
-    QString doValidation(const QString &source);
-    void generateDeclaration();
-    void generateAccessors();
+    void doConnections();
 
     QString name, capName, type, className;
-    QString code;
 
     uint revision;
 
@@ -66,7 +87,7 @@ private:
             final,
             comment;
 
-    QBitArray allowedCharacters;
+    QtPropertyGenerator *prnt;
 };
 
 #endif // WIDGET_H
