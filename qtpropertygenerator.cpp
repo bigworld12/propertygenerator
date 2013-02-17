@@ -198,9 +198,9 @@ void QtPropertyGenerator::generateCode()
         else {
             headerCode.append("//Auto-generated properties:\n");
             for (int i = 0; i < properties.size(); ++i) properties[i]->generateDeclaration(headerCode);
-            headerCode.append("private: ");
+            headerCode.append("\nprivate:\n");
             for (int i = 0; i < properties.size(); ++i) properties[i]->generatePrivate(headerCode);
-            headerCode.append("public:\n");
+            headerCode.append("\npublic:\n");
 
             for (int i = 0; i < properties.size(); ++i) {
                 properties[i]->generateGetterDeclaration(headerCode);
