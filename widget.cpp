@@ -92,7 +92,7 @@ void Widget::generateDeclaration(QString &code)
 
 void Widget::generateComment(QString &code)
 {
-    if (comment) code.append("// " + ui->pComment->toPlainText() + "\n\n");
+    if (comment) code.append("// " + ui->pComment->toPlainText() + "\n");
 }
 
 void Widget::generatePrivate(QString &code)
