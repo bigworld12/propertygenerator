@@ -69,7 +69,7 @@ void Widget::initGui()
     ui->cEmitType->addItem("void");
     ui->cEmitType->addItem("by value");
     ui->cEmitType->addItem("by reference");
-    ui->cEmitType->setVisible(false);
+    ui->cEmitType->setEnabled(false);
 }
 
 
@@ -234,7 +234,7 @@ void Widget::resetClicked()
 void Widget::notifyClicked()
 {
     notify = ui->cNotify->isChecked();
-    ui->cEmitType->setVisible(notify);
+    ui->cEmitType->setEnabled(notify);
 }
 
 void Widget::revClicked()
