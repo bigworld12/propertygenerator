@@ -133,7 +133,6 @@ void Widget::generateSetterDeclaration(QString &code)
         } else {
             code.append("void");
         }
-
         code.append("set" + capName + "(const " + type + " &v);\n");
     }
 }
@@ -306,6 +305,5 @@ void Widget::paintEvent(QPaintEvent *)
     g.setColorAt(0.0f, Qt::white);
     g.setColorAt(1.0f, Qt::lightGray);
     p.fillRect(rect(), g);
-
 }
 
