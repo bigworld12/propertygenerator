@@ -167,7 +167,7 @@ void QtPropertyGenerator::generateCode()
                 properties[i]->generateNameType(headerCode);
                 properties[i]->generateComment(headerCode);
                 properties[i]->generateDeclaration(headerCode);
-                headerCode.append("private:\n");
+                headerCode.append("private: ");
                 properties[i]->generatePrivate(headerCode);
                 headerCode.append("public: ");
                 properties[i]->generateGetterDeclaration(headerCode);

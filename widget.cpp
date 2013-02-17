@@ -92,7 +92,7 @@ void Widget::generateDeclaration(QString &code)
 
 void Widget::generateComment(QString &code)
 {
-    if (comment) code.append("// " + ui->pComment->toPlainText() + "\n");
+    if (comment) code.append("// " + ui->pComment->toPlainText() + "\n\n");
 }
 
 void Widget::generatePrivate(QString &code)
@@ -114,14 +114,14 @@ void Widget::generateGetterDefinition(QString &code)
 {
     code.append(type + " " + prnt->getClassName() + "::" + name + "() const {\n");
     code.append("\treturn m_" + name + ";\n");
-    code.append("}\n");
+    code.append("}\n\n");
 }
 
 void Widget::generateGetterInline(QString &code)
 {
     code.append("inline " + type + " " + name + "() const {\n");
     code.append("\treturn m_" + name + ";\n");
-    code.append("}\n");
+    code.append("}\n\n");
 }
 
 void Widget::generateSetterDeclaration(QString &code)
@@ -141,7 +141,7 @@ void Widget::generateSetterDeclaration(QString &code)
 void Widget::generateSetterDefinition(QString &code)
 {
     if (write) {
-        code.append(type + " " + prnt->getClassName() + "::set" + capName + "(const " + type + " &v) {\n");
+        code.append(prnt->getClassName() + " &" + prnt->getClassName() + "::set" + capName + "(const " + type + " &v) {\n");
 
         code.append("\tif (m_" + name + " != v) {\n");
         code.append("\t\tm_" + name + " = v;\n");
@@ -152,7 +152,7 @@ void Widget::generateSetterDefinition(QString &code)
         code.append("\t}\n");
 
         if (chain) code.append("\treturn *this;\n");
-        code.append("}\n");
+        code.append("}\n\n");
     }
 }
 
@@ -176,7 +176,7 @@ void Widget::generateSetterInline(QString &code)
         code.append("\t}\n");
 
         if (chain) code.append("\treturn *this;\n");
-        code.append("}\n");
+        code.append("}\n\n");
     }
 }
 
@@ -191,7 +191,7 @@ void Widget::generateResetDefinition(QString &code)
 {
     if (reset) {
         code.append(type + " " + prnt->getClassName() + "::reset" + capName + "() {\n");
-        code.append("\t//TODO reset\n}\n");
+        code.append("\t//TODO reset\n}\n\n");
     }
 }
 
@@ -199,7 +199,7 @@ void Widget::generateResetInline(QString &code)
 {
     if (reset) {
         code.append("Q_SLOT void reset" + capName + "() {\n");
-        code.append("\t//TODO reset\n}\n");
+        code.append("\t//TODO reset\n}\n\n");
     }
 }
 
