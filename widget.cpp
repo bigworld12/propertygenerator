@@ -133,7 +133,7 @@ void Widget::generateSetterDeclaration(QString &code)
         } else {
             code.append("void");
         }
-        code.append("set" + capName + "(const " + type + " &v);\n");
+        code.append(" set" + capName + "(const " + type + " &v);\n");
     }
 }
 
@@ -165,7 +165,7 @@ void Widget::generateSetterInline(QString &code)
             code.append("void");
         }
 
-        code.append("set" + capName + "(const " + type + " &v) {\n");
+        code.append(" set" + capName + "(const " + type + " &v) {\n");
         code.append("\tif (m_" + name + " != v) {\n");
         code.append("\t\tm_" + name + " = v;\n");
         if (notify) {
