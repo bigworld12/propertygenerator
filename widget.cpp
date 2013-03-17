@@ -168,15 +168,13 @@ void Widget::generateSetterInline(QString &code)
 {
     if (write) {
         code.append("Q_SLOT ");
-        if (chain) {
-            code.append(prnt->getClassName() + " &");
-        } else {
-            code.append("void");
-        }
+        if (chain)code.append(prnt->getClassName() + " &");
+        else code.append("void");
 
         code.append(" set" + capName + "(const " + type + " &v) {\n");
         code.append("\tif (m_" + name + " != v) {\n");
         code.append("\t\tm_" + name + " = v;\n");
+
         if (notify) {
             if (ui->cEmitType->currentIndex() > 0) code.append("\t\temit " + name + "Changed(" + "m_" + name + ");\n");
             else code.append("\t\temit " + name + "Changed();\n");
