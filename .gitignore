@@ -125,8 +125,7 @@ Thumbs.db
 
 # Folder config file
 Desktop.ini
-Makefile*
-Makefile.*
+/Makefile*
 
 #############
 ## Python
