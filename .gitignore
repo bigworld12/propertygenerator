@@ -163,3 +163,5 @@ pip-log.txt
 .DS_Store
 /.vs
 /.qmake.stash
+/ui_qtpropertygenerator.h
+/ui_widget.h
