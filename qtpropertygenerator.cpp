@@ -95,7 +95,7 @@ void QtPropertyGenerator::initAllowedCharacters()
 {
     for (int i = 0; i < 256; ++i) allowedCharacters[i] = false;
 
-    QString allowed("AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz_0123456789");
+    QString allowed("AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz_0123456789<>*,");
 
     for (int i = 0; i < allowed.length(); ++i) allowedCharacters[allowed.at(i).unicode()] = true;
 }
@@ -176,7 +176,7 @@ void QtPropertyGenerator::generateCode()
                 properties[i]->generateSetterDefinition(sourceCode);
                 properties[i]->generateResetDeclaration(headerCode);
                 properties[i]->generateResetDefinition(sourceCode);
-                properties[i]->generateNotify(headerCode);
+                properties[i]->generateNotify(headerCode);                
             }
         }
     }
@@ -206,7 +206,7 @@ void QtPropertyGenerator::generateCode()
                 properties[i]->generateGetterDeclaration(headerCode);
                 properties[i]->generateGetterDefinition(sourceCode);
             }
-            headerCode.append("\n");
+            headerCode.append("\npublic slots:\n");
             for (int i = 0; i < properties.size(); ++i) {
                 properties[i]->generateSetterDeclaration(headerCode);
                 properties[i]->generateSetterDefinition(sourceCode);
@@ -216,7 +216,7 @@ void QtPropertyGenerator::generateCode()
                 properties[i]->generateResetDeclaration(headerCode);
                 properties[i]->generateResetDefinition(sourceCode);
             }
-            headerCode.append("\n");
+            headerCode.append("\nsignals:\n");
             for (int i = 0; i < properties.size(); ++i) properties[i]->generateNotify(headerCode);
         }
     }

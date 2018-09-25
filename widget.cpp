@@ -128,8 +128,7 @@ void Widget::generateGetterInline(QString &code)
 
 void Widget::generateSetterDeclaration(QString &code)
 {
-    if (write) {
-        code.append("Q_SLOT ");
+    if (write) {        
         if (chain) {
             code.append(prnt->getClassName() + " &");
         } else {
@@ -212,7 +211,7 @@ void Widget::generateResetInline(QString &code)
 void Widget::generateNotify(QString &code)
 {
     if (notify) {
-        code.append("Q_SIGNAL void " + name + "Changed(");
+        code.append("void " + name + "Changed(");
         if (ui->cEmitType->currentIndex() == 1) {
             code.append(type);
         } else if (ui->cEmitType->currentIndex() == 2) {
